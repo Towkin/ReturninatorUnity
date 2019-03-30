@@ -5,6 +5,6 @@ namespace Returninator.Gameplay
 {
     public interface IInputChannel
     {
-        InputChange GetInputChange(int tick);
+        InputChange GetInputChange();
     }
 }

@@ -72,7 +72,7 @@ namespace Returninator.Gameplay
         public float Horizontal { get; private set; }
         public float Vertical   { get; private set; }
 
-        public void UpdateState(InputChange change)
+        public void UpdateState(in InputChange change)
         {
             if (change.Count == 0)
                 return;

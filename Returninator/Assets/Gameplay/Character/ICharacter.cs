@@ -1,8 +1,10 @@
-﻿
+﻿using UnityEngine;
+
 namespace Returninator.Gameplay
 {
-    public interface ICharacter
+    public interface ICharacter: IEntity
     {
-        
+        void SetResetPosition(Vector2 resetPosition);
+        void SetInput(IInputChannel input);
     }
 }
