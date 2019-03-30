@@ -3,7 +3,10 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Team[0]
+  - Team[1]
+  - Environment
   layers:
   - Default
   - TransparentFX
@@ -13,6 +16,10 @@ TagManager:
   - UI
   - 
   - 
+  - GameplayStatic
+  - GameplayDynamic
+  - GameplayTeam[0]
+  - GameplayTeam[1]
   - 
   - 
   - 
@@ -21,13 +28,9 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - EnvironmentStatic
+  - EnvironmentDynamic
+  - EnvironmentDetail
   - 
   - 
   - 
@@ -40,4 +43,25 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: EnvironmentBackground
+    uniqueID: 2012040277
+    locked: 0
+  - name: GameplayBackground
+    uniqueID: 1613764931
+    locked: 0
+  - name: EnvironmentDetail
+    uniqueID: 539427159
+    locked: 0
+  - name: GameplayEntity
+    uniqueID: 4273387703
+    locked: 0
+  - name: EnvironmentForeground
+    uniqueID: 1353509505
+    locked: 0
+  - name: GameplayForeground
+    uniqueID: 1189085209
+    locked: 0
+  - name: UI
+    uniqueID: 2000948391
     locked: 0
