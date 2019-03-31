@@ -10,34 +10,29 @@ namespace Returninator.Gameplay
     public class CharacterSettings
     {
         [SerializeField]
-        private AnimationCurve m_Acceleration;
+        private float m_Acceleration = 10.0f;
         [SerializeField]
-        private AnimationCurve m_AirAcceleration;
+        private float m_Deacceleration = 5.0f;
         [SerializeField]
-        private AnimationCurve m_Deacceleration;
-        [SerializeField]
-        private AnimationCurve m_AirDeacceleration;
+        private float m_MaxSpeed = 10f;
 
         [SerializeField]
-        private float m_MaxAccelerationSpeed = 10f;
+        private AnimationCurve m_AccelerationFactor;
+        [SerializeField]
+        private AnimationCurve m_AirAccelerationFactor;
+        [SerializeField]
+        private AnimationCurve m_DeaccelerationFactor;
+        [SerializeField]
+        private AnimationCurve m_AirDeaccelerationFactor;
 
-        public float MaxAccelerationSpeed => m_MaxAccelerationSpeed;
 
-        public float GetAcceleration(float speed, bool grounded)
-        {
-            if (grounded)
-                return m_Acceleration.Evaluate(speed);
-            else
-                return m_AirAcceleration.Evaluate(speed);
-        }
+        public float MaxAccelerationSpeed => m_MaxSpeed;
 
-        public float GetDeacceleration(float speed, bool grounded)
-        {
-            if (grounded)
-                return m_Deacceleration.Evaluate(speed);
-            else
-                return m_AirDeacceleration.Evaluate(speed);
-        }
+        public float GetAcceleration(float speed, bool grounded) => 
+            m_Acceleration * (grounded ? m_AccelerationFactor : m_AirAccelerationFactor).Evaluate(speed);
+
+        public float GetDeacceleration(float speed, bool grounded) =>
+            m_Deacceleration * (grounded ? m_DeaccelerationFactor : m_AirDeaccelerationFactor).Evaluate(speed);
     }
 
     [Serializable]
