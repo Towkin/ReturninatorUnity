@@ -41,13 +41,13 @@ namespace Returninator.Gameplay
         public float MaxAccelerationSpeed => m_MaxSpeed;
         public float GetAcceleration(float speed, bool grounded)
             => grounded ?
-                m_Acceleration.GetValue(speed) :
-                m_AirAcceleration.GetValue(speed);
+                m_Acceleration.GetValue(speed / m_MaxSpeed) :
+                m_AirAcceleration.GetValue(speed / m_MaxSpeed);
 
         public float GetDeacceleration(float speed, bool grounded)
             => grounded ?
-                m_Deacceleration.GetValue(speed) :
-                m_AirDeacceleration.GetValue(speed);
+                m_Deacceleration.GetValue(speed / m_MaxSpeed) :
+                m_AirDeacceleration.GetValue(speed / m_MaxSpeed);
     }
 
     [Serializable]
