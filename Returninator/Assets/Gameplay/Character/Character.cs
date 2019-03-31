@@ -6,10 +6,46 @@ using UnityEngine;
 
 namespace Returninator.Gameplay
 {
+    [Serializable]
+    public class CharacterSettings
+    {
+        [SerializeField]
+        private AnimationCurve m_Acceleration;
+        [SerializeField]
+        private AnimationCurve m_AirAcceleration;
+        [SerializeField]
+        private AnimationCurve m_Deacceleration;
+        [SerializeField]
+        private AnimationCurve m_AirDeacceleration;
+
+        [SerializeField]
+        private float m_MaxAccelerationSpeed = 10f;
+
+        public float MaxAccelerationSpeed => m_MaxAccelerationSpeed;
+
+        public float GetAcceleration(float speed, bool grounded)
+        {
+            if (grounded)
+                return m_Acceleration.Evaluate(speed);
+            else
+                return m_AirAcceleration.Evaluate(speed);
+        }
+
+        public float GetDeacceleration(float speed, bool grounded)
+        {
+            if (grounded)
+                return m_Deacceleration.Evaluate(speed);
+            else
+                return m_AirDeacceleration.Evaluate(speed);
+        }
+    }
+
+    [Serializable]
     public struct CharacterMovement
     {
         private Vector2 m_Direction;
         private float m_Magnitude;
+
         public float Speed
         {
             get => m_Magnitude;
@@ -23,7 +59,6 @@ namespace Returninator.Gameplay
                 else
                 {
                     m_Magnitude = value;
-                    Debug.Log("Speed: " + m_Magnitude);
                 }
             }
         }
@@ -47,7 +82,6 @@ namespace Returninator.Gameplay
                     return;
 
                 m_Direction = value.normalized;
-                Debug.Log("Direction: " + m_Direction);
             }
         }
 
@@ -68,6 +102,8 @@ namespace Returninator.Gameplay
         private InputState m_CurrentInput;
         private IInputChannel m_InputChannel;
         private CharacterMovement m_Movement;
+        [SerializeField]
+        private CharacterSettings m_Settings;
 
         public Rigidbody2D Body { get; private set; }
 
@@ -77,6 +113,7 @@ namespace Returninator.Gameplay
             Body = GetComponentInChildren<Rigidbody2D>();
             m_CurrentInput = default;
             m_Movement = default;
+            SetInput(new PlayerInputChannel());
         }
 
         public void SetResetPosition(Vector2 resetPosition)
@@ -92,9 +129,9 @@ namespace Returninator.Gameplay
         public void FixedUpdate() => Tick();
         public void Tick()
         {
-            //UpdateInput();
+            UpdateInput();
             UpdateVelocity();
-            UpdatePosition();
+            //UpdatePosition();
         }
 
         private void UpdateInput()
@@ -104,10 +141,34 @@ namespace Returninator.Gameplay
 
         private void UpdateVelocity()
         {
-            var inputVector = new Vector2(m_CurrentInput.Horizontal, 0f);
+            m_Movement.Velocity = Body.velocity;
 
-            m_Movement.SpeedX += Input.GetAxis("Horizontal") * 25.0f * Time.fixedDeltaTime;
+            var filter = new ContactFilter2D()
+            {
+                layerMask = Physics2D.GetLayerCollisionMask(Body.gameObject.layer),
+                useLayerMask = true,
 
+                useDepth = false,
+                useNormalAngle = false,
+                useTriggers = false,
+            };
+
+            var grounded = Body.Cast(Physics2D.gravity.normalized, filter, MovementHits, 0.025f) > 0;
+            
+            
+            var deacceleration = m_Settings.GetDeacceleration(m_Movement.Speed, grounded);
+            var speedRemove = deacceleration * Time.fixedDeltaTime;
+            m_Movement.Speed = Mathf.Max(0, m_Movement.Speed - speedRemove);
+
+            if (m_Movement.Speed < m_Settings.MaxAccelerationSpeed)
+            {
+                var inputVector = Vector2.ClampMagnitude(new Vector2(m_CurrentInput.Horizontal, 0f), 1.0f);
+                var acceleration = m_Settings.GetAcceleration(Vector2.Dot(inputVector, m_Movement.Velocity), grounded);
+                var velocityAdd = inputVector * acceleration * Time.fixedDeltaTime;
+
+                m_Movement.Velocity = Vector2.ClampMagnitude(m_Movement.Velocity + velocityAdd, m_Settings.MaxAccelerationSpeed);
+            }
+            Body.velocity = m_Movement.Velocity;
         }
 
         private static PhysicsMaterial2D m_DefaultPhsyicsMaterial;
@@ -125,8 +186,7 @@ namespace Returninator.Gameplay
                 return m_DefaultPhsyicsMaterial;
             }
         }
-
-        private static List<ContactPoint2D> ContactHits { get; } = new List<ContactPoint2D>();
+        
         private static List<RaycastHit2D> MovementHits { get; } = new List<RaycastHit2D>();
         private void UpdatePosition()
         {
@@ -147,10 +207,10 @@ namespace Returninator.Gameplay
             var groundedMaxDotProduct = 0.5f;
             var groundedMinDotProduct = 0.2f;
 
-            Body.GetContacts(filter, ContactHits);
-            for (int i = 0; i < ContactHits.Count; i++)
+            Body.Cast(Vector2.zero, filter, MovementHits, 0f);
+            for (int i = 0; i < MovementHits.Count; i++)
             {
-                if (Vector2.Dot(ContactHits[i].normal, groundNormal) > 0f)
+                if (Vector2.Dot(MovementHits[i].normal, groundNormal) > groundedMinDotProduct)
                 {
                     bodyGravity = Vector2.zero;
                     break;
@@ -168,9 +228,25 @@ namespace Returninator.Gameplay
                 Body.Cast(m_Movement.Direction, filter, MovementHits, m_Movement.Speed * timeLeft) > 0; 
                 iteration++)
             {
-                var hit = MovementHits[0];
+                if (MovementHits.Any(h => h.distance < MovementHits[0].distance))
+                    Debug.LogError("Yeah your assumption is not correect...");
 
-                var timeSlice = Time.fixedDeltaTime * (hit.distance / (m_Movement.Speed * Time.fixedDeltaTime));
+
+
+                int hitIndex = -1;
+                for (int i = 0; i < MovementHits.Count && hitIndex == -1; i++)
+                    if (MovementHits[i].distance > 0f)
+                        hitIndex = i;
+
+                if (hitIndex == -1)
+                {
+                    transform.position += (Vector3)(MovementHits[0].normal * Time.fixedDeltaTime);
+                    break;
+                }
+
+                var hit = MovementHits[hitIndex];
+                
+                var timeSlice = timeLeft * hit.fraction;
                 timeLeft -= timeSlice;
 
                 // Step the body before recalculating the velocity.
