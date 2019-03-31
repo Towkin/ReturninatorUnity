@@ -17,13 +17,13 @@ namespace Returninator.Gameplay
         private float m_MaxSpeed = 10f;
 
         [SerializeField]
-        private AnimationCurve m_AccelerationFactor;
+        private AnimationCurve m_AccelerationFactor = AnimationCurve.Constant(0, 1, 1f);
         [SerializeField]
-        private AnimationCurve m_AirAccelerationFactor;
+        private AnimationCurve m_AirAccelerationFactor = AnimationCurve.Constant(0, 1, 1f);
         [SerializeField]
-        private AnimationCurve m_DeaccelerationFactor;
+        private AnimationCurve m_DeaccelerationFactor = AnimationCurve.Constant(0, 1, 1f);
         [SerializeField]
-        private AnimationCurve m_AirDeaccelerationFactor;
+        private AnimationCurve m_AirDeaccelerationFactor = AnimationCurve.Constant(0, 1, 1f);
 
 
         public float MaxAccelerationSpeed => m_MaxSpeed;
