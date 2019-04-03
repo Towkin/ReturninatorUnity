@@ -6,66 +6,6 @@ using UnityEngine;
 
 namespace Returninator.Gameplay
 {
-
-
-
-    [Serializable]
-    public struct CharacterMovement
-    {
-        private Vector2 m_Direction;
-        private float m_Magnitude;
-
-        public float Speed
-        {
-            get => m_Magnitude;
-            set
-            {
-                if (value < 0f)
-                {
-                    m_Direction = -m_Direction;
-                    m_Magnitude = -value;
-                }
-                else
-                {
-                    m_Magnitude = value;
-                }
-            }
-        }
-        public float SpeedX
-        {
-            get => Direction.x * Speed;
-            set => Velocity = new Vector2(value, SpeedY);
-        }
-        public float SpeedY
-        {
-            get => Direction.y * Speed;
-            set => Velocity = new Vector2(SpeedX, value);
-        }
-
-        public Vector2 Direction
-        {
-            get => m_Direction;
-            set
-            {
-                if (value == Vector2.zero)
-                    return;
-
-                m_Direction = value.normalized;
-            }
-        }
-
-        public Vector2 Velocity
-        {
-            get => Direction * Speed;
-            set
-            {
-                Speed = value.magnitude;
-                if (Speed > float.Epsilon)
-                    m_Direction = value / Speed;
-            }
-        }
-    }
-
     public class Character: MonoBehaviour, ICharacter
     {
         private InputState m_CurrentInput;
@@ -247,6 +187,63 @@ namespace Returninator.Gameplay
                 - Body.drag * Time.fixedDeltaTime 
                 - alongGround * physicsMaterial.friction * timeLeft);
             //Body.velocity = m_Movement.Velocity;
+        }
+    }
+
+    [Serializable]
+    public struct CharacterMovement
+    {
+        private Vector2 m_Direction;
+        private float m_Magnitude;
+
+        public float Speed
+        {
+            get => m_Magnitude;
+            set
+            {
+                if (value < 0f)
+                {
+                    m_Direction = -m_Direction;
+                    m_Magnitude = -value;
+                }
+                else
+                {
+                    m_Magnitude = value;
+                }
+            }
+        }
+        public float SpeedX
+        {
+            get => Direction.x * Speed;
+            set => Velocity = new Vector2(value, SpeedY);
+        }
+        public float SpeedY
+        {
+            get => Direction.y * Speed;
+            set => Velocity = new Vector2(SpeedX, value);
+        }
+
+        public Vector2 Direction
+        {
+            get => m_Direction;
+            set
+            {
+                if (value == Vector2.zero)
+                    return;
+
+                m_Direction = value.normalized;
+            }
+        }
+
+        public Vector2 Velocity
+        {
+            get => Direction * Speed;
+            set
+            {
+                Speed = value.magnitude;
+                if (Speed > float.Epsilon)
+                    m_Direction = value / Speed;
+            }
         }
     }
 }

@@ -27,5 +27,4 @@ namespace Returninator.Gameplay
                 m_Deacceleration.GetValue(speed / m_MaxSpeed) :
                 m_AirDeacceleration.GetValue(speed / m_MaxSpeed);
     }
-
 }
